@@ -1,0 +1,489 @@
+I need you to rebuild the LegalLens frontend as a React + Tailwind CSS application. Keep the existing FastAPI backend completely untouched — it works and serves the API on port 8000. Build a modern React frontend that talks to the backend API.
+
+## TECH STACK FOR FRONTEND:
+- React 18 with Vite
+- Tailwind CSS for styling
+- React Router for navigation
+- Lucide React for icons
+- Recharts for dashboard charts
+- Axios for API calls
+- The frontend should be served alongside FastAPI — either through FastAPI serving the built static files, or running on a separate port with proxy
+
+## DESIGN SYSTEM:
+- Clean, minimal, professional SaaS aesthetic — inspired by Linear, Notion, Checkbox.ai
+- Dark sidebar (slate-900) with light content area (gray-50/white)
+- Primary color: Indigo-600 (#4F46E5)
+- Accent: Emerald for success, Amber for warning, Rose for critical
+- Font: Inter (import from Google Fonts)
+- Rounded corners (rounded-lg), subtle shadows (shadow-sm), clean borders (border-gray-200)
+- Consistent spacing: p-6 for page content, gap-4 for grids
+- Cards with white background, border, subtle shadow
+- Status badges: small rounded pills with color coding
+- Transitions on hover for interactive elements
+- NO harsh colors, NO gradients, NO overly decorative elements
+
+## NAVIGATION — DARK SIDEBAR (always visible):
+```
+┌─────────────────────┐
+│ ⚖️ LegalLens        │  ← Logo/brand
+│ AI Legal Hub        │  ← Subtitle
+│─────────────────────│
+│ 🚪 Legal Front Door │  ← Home/default page
+│ 📋 Matters          │
+│ 💬 AI Assistant     │
+│ 📄 Documents        │
+│ 📊 Analytics        │
+│ 🔒 Privacy & Safety │
+│─────────────────────│
+│ ⚙️ Settings         │
+│─────────────────────│
+│ Built for enterprise │
+│ legal teams          │
+└─────────────────────┘
+```
+
+## PAGE 1: LEGAL FRONT DOOR (Home Page — /intake)
+
+This is the first thing users see. It should feel inviting and simple — a non-technical lawyer should immediately know what to do.
+
+Layout:
+```
+┌──────────────────────────────────────────────────────────────┐
+│ Welcome to LegalLens                                         │
+│ How can we help your legal team today?                       │
+│                                                              │
+│ ┌──────────────────────────────────────────────────────────┐ │
+│ │ 💬 Describe your legal request...                        │ │
+│ │                                                          │ │
+│ │                                          [Submit] button │ │
+│ └──────────────────────────────────────────────────────────┘ │
+│                                                              │
+│ Quick Actions:                                               │
+│ [📝 Request NDA] [📋 Contract Review] [❓ Policy Question]   │
+│ [⚠️ Compliance Check] [📑 Vendor Onboarding]                │
+│                                                              │
+│ ┌─────────────────────┐  ┌────────────────────────────────┐ │
+│ │ 📨 Slack Intake     │  │ 📧 Email Intake               │ │
+│ │                     │  │                                │ │
+│ │ Mock Slack UI       │  │ Mock email parsing view        │ │
+│ │ showing a request   │  │ showing incoming email         │ │
+│ │ "#legal need NDA    │  │ auto-parsed into a matter      │ │
+│ │ for Acme Corp"      │  │                                │ │
+│ │                     │  │ From: john@company.com         │ │
+│ │ Bot response:       │  │ Subject: Contract review needed│ │
+│ │ "Created matter     │  │ → Auto-classified: Contract    │ │
+│ │ #M-2024-0142..."    │  │ → Priority: High               │ │
+│ └─────────────────────┘  └────────────────────────────────┘ │
+│                                                              │
+│ Recent Requests (last 5):                                    │
+│ ┌──────────────────────────────────────────────────────────┐ │
+│ │ #M-0142 │ NDA Review    │ Sarah C. │ 🟢 In Progress │ 2h│ │
+│ │ #M-0141 │ Policy Q      │ Auto     │ 🟢 Resolved    │ 5m│ │
+│ │ #M-0140 │ MSA Review    │ James R. │ 🟡 Pending     │ 1d│ │
+│ │ #M-0139 │ Compliance    │ Lisa P.  │ 🟢 In Review   │ 3h│ │
+│ │ #M-0138 │ IP Assignment │ Michael  │ 🔴 Urgent      │ 4h│ │
+│ └──────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────┘
+```
+
+When user submits a request:
+- Show a nice animated card that appears below the input showing:
+  - "✅ Request received and classified"
+  - Matter type: "NDA Review" (with confidence badge: 94%)
+  - Priority: "Medium" (amber badge)
+  - Routing: "Assigned to Contracts Team → Sarah Chen"
+  - ETA: "Estimated 2 business days"
+  - Matter ID: "#M-2024-0143"
+  - [View Matter] button linking to matter detail page
+- This should call the actual backend when there's real input, or show mock classification for demo purposes
+
+The Slack mock should look like actual Slack:
+- Dark background (#1A1D21)
+- Show channel name "#legal-requests"
+- User avatar + name + timestamp
+- Message bubbles
+- Bot response with the LegalLens icon
+- Make it look real enough that someone would believe it's a screenshot
+
+The Email mock should show:
+- Email header (From, To, Subject, Date)
+- Email body content
+- Below it: "AI Analysis" card showing extracted intent, classification, priority, and auto-created matter link
+
+## PAGE 2: MATTERS (/matters)
+
+Kanban board + list view toggle.
+
+Kanban Layout:
+```
+[🔲 Kanban] [☰ List]  [+ New Matter]  [Filter ▾] [Search...]
+
+┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
+│ NEW (3)  │ │IN REVIEW │ │ PENDING  │ │ APPROVED │ │ CLOSED   │
+│          │ │   (2)    │ │APPROVAL  │ │   (2)    │ │   (1)    │
+│ ┌──────┐ │ │ ┌──────┐ │ │  (2)     │ │ ┌──────┐ │ │ ┌──────┐ │
+│ │ Card │ │ │ │ Card │ │ │ ┌──────┐ │ │ │ Card │ │ │ │ Card │ │
+│ │      │ │ │ │      │ │ │ │ Card │ │ │ │      │ │ │ │      │ │
+│ └──────┘ │ │ └──────┘ │ │ │      │ │ │ └──────┘ │ │ └──────┘ │
+│ ┌──────┐ │ │ ┌──────┐ │ │ └──────┘ │ │ ┌──────┐ │ │          │
+│ │ Card │ │ │ │ Card │ │ │ ┌──────┐ │ │ │ Card │ │ │          │
+│ │      │ │ │ │      │ │ │ │ Card │ │ │ │      │ │ │          │
+│ └──────┘ │ │ └──────┘ │ │ │      │ │ │ └──────┘ │ │          │
+│ ┌──────┐ │ │          │ │ └──────┘ │ │          │ │          │
+│ │ Card │ │ │          │ │          │ │          │ │          │
+│ └──────┘ │ │          │ │          │ │          │ │          │
+└──────────┘ └──────────┘ └──────────┘ └──────────┘ └──────────┘
+```
+
+Each matter card:
+```
+┌────────────────────────────┐
+│ #M-2024-0142          🔴   │  ← ID + priority dot
+│ Acme Corp NDA Review       │  ← Title (bold)
+│ NDA Review • Contracts     │  ← Type + Team
+│                            │
+│ 👤 Sarah Chen              │  ← Assignee
+│ 📎 2 docs  💬 3 comments   │  ← Counts
+│ Due: Feb 28                │  ← Due date
+│ ───────────────────        │
+│ 🟠 2 risk flags            │  ← Risk summary if docs analyzed
+└────────────────────────────┘
+```
+
+Clicking a card opens a matter detail panel (slide-in from right or new page):
+```
+┌──────────────────────────────────────────────────────────────┐
+│ ← Back to Matters                                            │
+│                                                              │
+│ #M-2024-0142 — Acme Corp NDA Review          [🟡 In Review] │
+│ Requested by: John Miller (Engineering) • Feb 20, 2026      │
+│ Assigned to: Sarah Chen (Contracts Team)                     │
+│                                                              │
+│ [Overview] [Documents] [Activity] [Tasks]    ← Tab navigation│
+│                                                              │
+│ OVERVIEW TAB:                                                │
+│ AI Summary: "NDA review for new vendor Acme Corp. Two high-  │
+│ risk clauses identified: non-compete (24mo) and liability    │
+│ cap below standard. Recommend negotiation before signing."   │
+│                                                              │
+│ Details:                                                     │
+│ Type: NDA Review     Priority: High    Due: Feb 28, 2026    │
+│ Requester: John Miller (Engineering)                         │
+│ Department: Engineering    Entity: Acme Technologies Inc.    │
+│                                                              │
+│ DOCUMENTS TAB:                                               │
+│ ┌────────────────────────────────────────────────────────┐   │
+│ │ 📄 acme_nda_v2.pdf  │ NDA │ 94% │ 🟠 2 HIGH risks   │   │
+│ │ [View Analysis] [Extract Clauses] [Compare]            │   │
+│ └────────────────────────────────────────────────────────┘   │
+│ [+ Upload Document]                                          │
+│                                                              │
+│ ACTIVITY TAB:                                                │
+│ Timeline:                                                    │
+│ 🕐 Feb 22, 3:15pm — AI completed clause extraction          │
+│    2 HIGH risk flags, 1 MEDIUM, 4 LOW                        │
+│ 🕐 Feb 22, 3:14pm — Document uploaded: acme_nda_v2.pdf      │
+│ 🕐 Feb 22, 3:10pm — Assigned to Sarah Chen                  │
+│ 🕐 Feb 22, 3:09pm — Auto-classified as NDA Review (94%)     │
+│ 🕐 Feb 22, 3:08pm — Created via Slack intake by John Miller │
+│                                                              │
+│ TASKS TAB:                                                   │
+│ ☑️ Initial AI review complete                                │
+│ ☐ Review non-compete clause (flagged HIGH)                   │
+│ ☐ Review liability cap (flagged HIGH)                        │
+│ ☐ Get VP Legal approval                                      │
+│ ☐ Send redlined version to counterparty                      │
+└──────────────────────────────────────────────────────────────┘
+```
+
+## PAGE 3: AI ASSISTANT (/assistant)
+
+Full chat interface that looks like a modern messaging app.
+
+Layout:
+```
+┌──────────────────────────────────────────────────────────────┐
+│ AI Legal Assistant                                           │
+│ Ask questions about policies, contracts, or get help with    │
+│ legal requests.                                              │
+│                                                              │
+│ ┌──────────────────────────────────┐ ┌────────────────────┐ │
+│ │                                  │ │ Available on:      │ │
+│ │  [Chat messages area]            │ │                    │ │
+│ │                                  │ │ 💬 Web (current)   │ │
+│ │  User: What's our standard      │ │ 📱 Slack           │ │
+│ │  liability cap for vendor       │ │ 📧 Email           │ │
+│ │  contracts?                     │ │ 🖥️ Teams           │ │
+│ │                                  │ │                    │ │
+│ │  🤖 Assistant:                   │ │ ──────────────     │ │
+│ │  Based on the organization's     │ │                    │ │
+│ │  contract playbook, the standard │ │ Suggested Queries: │ │
+│ │  liability cap is...             │ │                    │ │
+│ │                                  │ │ "What's our NDA    │ │
+│ │  📚 Sources:                     │ │  template?"        │ │
+│ │  • Contract Playbook, Sec 3.2   │ │                    │ │
+│ │  • Vendor Guidelines v2.1       │ │ "Summarize risks   │ │
+│ │                                  │ │  in matter #142"   │ │
+│ │  ⚡ Confidence: 92%              │ │                    │ │
+│ │                                  │ │ "What's our data   │ │
+│ │                                  │ │  retention policy?" │ │
+│ │                                  │ │                    │ │
+│ │ ┌──────────────────────────────┐ │ │ "Who handles IP    │ │
+│ │ │ Type your question...    [→] │ │ │  assignments?"     │ │
+│ │ └──────────────────────────────┘ │ │                    │ │
+│ └──────────────────────────────────┘ └────────────────────┘ │
+│                                                              │
+│ ⚠️ AI responses are for guidance only. Always consult with   │
+│ your legal team for final decisions.                         │
+│                                                              │
+│ ┌──────────────────────────────────────────────────────────┐ │
+│ │ Preview: AI Assistant on Slack                           │ │
+│ │ [Mock Slack DM with legal bot showing Q&A interaction]   │ │
+│ └──────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────┘
+```
+
+The chat should ACTUALLY WORK by calling the backend /api/v1/search/ask endpoint when the user types a question. For the first load, show a few mock conversation messages as examples.
+
+## PAGE 4: DOCUMENTS (/documents)
+
+Standalone document intelligence page (also accessible from within matters).
+
+Layout:
+```
+┌──────────────────────────────────────────────────────────────┐
+│ Document Intelligence                                        │
+│ Upload, classify, and analyze legal documents                │
+│                                                              │
+│ ┌────────────────────────────────────────────────┐           │
+│ │  📎 Drop files here or click to upload          │           │
+│ │  Supports PDF, DOCX, TXT                       │           │
+│ └────────────────────────────────────────────────┘           │
+│                                                              │
+│ [🔍 Classify] [⚖️ Extract Clauses] [🔄 Compare] ← Tab nav  │
+│                                                              │
+│ Document Library:                                            │
+│ ┌────────────────────────────────────────────────────────┐   │
+│ │ File          │ Type    │ Classification │ Risk  │ Date │   │
+│ │ acme_nda.pdf  │ PDF     │ NDA (94%)     │ 🟠 2H │ 2/22 │   │
+│ │ vendor_msa.pdf│ PDF     │ MSA (91%)     │ 🔴 3C │ 2/21 │   │
+│ │ sow_draft.docx│ DOCX    │ SOW (88%)     │ 🟢 0  │ 2/20 │   │
+│ └────────────────────────────────────────────────────────┘   │
+│                                                              │
+│ [Selected doc analysis panel — clauses, risks, playbook]     │
+└──────────────────────────────────────────────────────────────┘
+```
+
+Upload and classification should call real backend endpoints. Show clause extraction results with the colored risk badges (LOW=emerald, MEDIUM=amber, HIGH=orange, CRITICAL=rose).
+
+## PAGE 5: ANALYTICS (/analytics)
+
+Executive dashboard with charts.
+
+Layout:
+```
+┌──────────────────────────────────────────────────────────────┐
+│ Analytics & Reporting                     [Last 30 days ▾]   │
+│                                                              │
+│ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────────┐ │
+│ │ 47       │ │ 128      │ │ 3.2 days │ │ 94%              │ │
+│ │Open      │ │Requests  │ │Avg Cycle │ │Resolution        │ │
+│ │Matters   │ │This Month│ │Time      │ │Rate              │ │
+│ │ ↑12%     │ │ ↑23%     │ │ ↓15%     │ │ ↑5%              │ │
+│ └──────────┘ └──────────┘ └──────────┘ └──────────────────┘ │
+│                                                              │
+│ ┌────────────────────────────┐ ┌───────────────────────────┐ │
+│ │ Request Volume (6 months)  │ │ Matters by Type           │ │
+│ │ [Line chart with trend]    │ │ [Donut chart]             │ │
+│ │                            │ │ NDA 35%                   │ │
+│ │                            │ │ Contract 25%              │ │
+│ │                            │ │ Policy 20%                │ │
+│ │                            │ │ Compliance 10%            │ │
+│ │                            │ │ Other 10%                 │ │
+│ └────────────────────────────┘ └───────────────────────────┘ │
+│                                                              │
+│ ┌────────────────────────────┐ ┌───────────────────────────┐ │
+│ │ Workload by Assignee       │ │ Matters by Status         │ │
+│ │ [Horizontal bar chart]     │ │ [Bar chart]               │ │
+│ │ Lisa P.    ████████ 15    │ │                           │ │
+│ │ Sarah C.   ██████ 12      │ │                           │ │
+│ │ James R.   ████ 8         │ │                           │ │
+│ │ Michael T. ████ 7         │ │                           │ │
+│ │ Emily W.   ███ 5          │ │                           │ │
+│ └────────────────────────────┘ └───────────────────────────┘ │
+│                                                              │
+│ ┌────────────────────────────┐ ┌───────────────────────────┐ │
+│ │ Avg Response Time by Type  │ │ Risk Distribution         │ │
+│ │ [Bar chart]                │ │ [Pie chart]               │ │
+│ └────────────────────────────┘ └───────────────────────────┘ │
+│                                                              │
+│ ⚠️ Bottleneck Alert: 5 matters in "Pending Approval" for    │
+│ more than 7 days. [View Matters →]                           │
+└──────────────────────────────────────────────────────────────┘
+```
+
+All charts use Recharts with consistent colors from the design system. All data is mock but realistic.
+
+## PAGE 6: PRIVACY & LLM SAFETY (/privacy)
+
+This is the most important page for differentiation. It needs to be clear, visual, and reassuring to non-technical lawyers.
+
+Layout:
+```
+┌──────────────────────────────────────────────────────────────┐
+│ Privacy & LLM Safety                                         │
+│ How LegalLens keeps your most sensitive data secure          │
+│                                                              │
+│ SECTION 1: HOW YOUR DATA FLOWS                               │
+│ ┌──────────────────────────────────────────────────────────┐ │
+│ │ Visual pipeline:                                         │ │
+│ │                                                          │ │
+│ │ [Upload Doc] → [Extract Text] → [PII Scan] → [Chunk] → │ │
+│ │ [Send to LLM] → [Analysis] → [Audit Log]               │ │
+│ │  (on your       (local)      (redact      (relevant     │ │
+│ │   server)                     before        sections     │ │
+│ │                               sending)      only)        │ │
+│ │                                                          │ │
+│ │ ✅ Documents stored on YOUR servers                      │ │
+│ │ ✅ No data retained by LLM provider                     │ │
+│ │ ✅ Every AI interaction logged and auditable             │ │
+│ │ ✅ PII detected and redacted before LLM processing      │ │
+│ │ ❌ No training on your data — ever                      │ │
+│ │ ❌ No third-party access to your documents              │ │
+│ └──────────────────────────────────────────────────────────┘ │
+│                                                              │
+│ SECTION 2: DEPLOYMENT MODES                                  │
+│ ┌─────────────────────────┐ ┌────────────────────────────┐  │
+│ │ 🔒 SELF-HOSTED          │ │ 🔗 HYBRID                  │  │
+│ │ AIR-GAPPED              │ │                            │  │
+│ │                         │ │ External LLM APIs          │  │
+│ │ LLM runs locally        │ │ (Claude, GPT) with         │  │
+│ │ (Llama 3, Mistral)      │ │ zero-retention agreements  │  │
+│ │                         │ │                            │  │
+│ │ All data stays on-prem  │ │ Integrates with CLM/DMS    │  │
+│ │ Zero external API calls │ │ tools via secure API       │  │
+│ │                         │ │ connectors                 │  │
+│ │ Best for:               │ │                            │  │
+│ │ Defense, Healthcare,    │ │ Best for:                  │  │
+│ │ Financial Services,     │ │ Tech companies,            │  │
+│ │ Strict data residency   │ │ enterprises with vetted    │  │
+│ │                         │ │ vendor programs            │  │
+│ │ [Currently Active ✅]   │ │ [Switch to Hybrid]         │  │
+│ └─────────────────────────┘ └────────────────────────────┘  │
+│                                                              │
+│ SECTION 3: WHAT THE AI SEES — TRANSPARENCY PANEL             │
+│ ┌──────────────────────────────────────────────────────────┐ │
+│ │ When you upload a contract, here's exactly what happens: │ │
+│ │                                                          │ │
+│ │ Step 1: 📄 Document text extracted (locally)             │ │
+│ │ Step 2: 🔍 PII Detection — names, SSNs, account #s     │ │
+│ │         flagged and optionally redacted                  │ │
+│ │ Step 3: ✂️ Text split into relevant sections             │ │
+│ │ Step 4: 🤖 Only relevant sections sent to LLM with      │ │
+│ │         task-specific prompt                             │ │
+│ │ Step 5: 📊 LLM returns structured analysis              │ │
+│ │ Step 6: 📝 Full audit log recorded                      │ │
+│ │                                                          │ │
+│ │ "The LLM never sees your full document — only the       │ │
+│ │  relevant sections needed for the specific task."        │ │
+│ └──────────────────────────────────────────────────────────┘ │
+│                                                              │
+│ SECTION 4: INTEGRATIONS                                      │
+│ ┌──────┐ ┌──────┐ ┌────────┐ ┌────────┐ ┌──────┐ ┌──────┐ │
+│ │Slack │ │Email │ │Ironclad│ │iManage │ │DocuSi│ │Jira  │ │
+│ │ ✅   │ │ ✅   │ │  ○     │ │  ○     │ │  ○   │ │  ○   │ │
+│ └──────┘ └──────┘ └────────┘ └────────┘ └──────┘ └──────┘ │
+│ ┌──────┐ ┌──────┐                                           │
+│ │Salesf│ │SSO   │  ○ = Available  ✅ = Connected            │
+│ │  ○   │ │ ✅   │                                           │
+│ └──────┘ └──────┘                                           │
+│                                                              │
+│ SECTION 5: MODEL SELECTION GUIDE                             │
+│ ┌──────────────────────────────────────────────────────────┐ │
+│ │ Table comparing Self-Hosted vs API models                │ │
+│ │ Rows: Data residency, Performance, Cost, Setup,          │ │
+│ │       Attorney-client privilege, Best for                │ │
+│ └──────────────────────────────────────────────────────────┘ │
+│                                                              │
+│ SECTION 6: AUDIT TRAIL (live from backend)                   │
+│ ┌──────────────────────────────────────────────────────────┐ │
+│ │ Recent AI interactions (pull from /api/v1/governance)     │ │
+│ │ Table: Timestamp | Action | Document | Model | Latency   │ │
+│ │ [Export to CSV]                                          │ │
+│ └──────────────────────────────────────────────────────────┘ │
+│                                                              │
+│ Compliance badges at bottom:                                 │
+│ [SOC 2 Ready] [ISO 27001 Ready] [GDPR Compliant]           │
+│ [CCPA Compliant] [EU AI Act Ready]                          │
+└──────────────────────────────────────────────────────────────┘
+```
+
+## MOCK DATA:
+
+Create a mockData.js file with:
+
+```javascript
+// 10 matters
+export const matters = [
+  {
+    id: "M-2024-0142",
+    title: "Acme Corp NDA Review",
+    type: "NDA Review",
+    status: "In Review",
+    priority: "High",
+    requester: { name: "John Miller", department: "Engineering", email: "john.miller@company.com" },
+    assignee: { name: "Sarah Chen", team: "Contracts" },
+    createdAt: "2026-02-22T15:08:00Z",
+    dueDate: "2026-02-28",
+    documents: 2,
+    comments: 3,
+    riskFlags: { high: 2, medium: 1, low: 4 },
+    summary: "NDA review for new vendor Acme Corp. Two high-risk clauses identified: non-compete (24mo) and liability cap below standard.",
+    source: "Slack",
+    timeline: [
+      { time: "Feb 22, 3:15 PM", action: "AI completed clause extraction", detail: "2 HIGH risk flags, 1 MEDIUM, 4 LOW", icon: "analysis" },
+      { time: "Feb 22, 3:14 PM", action: "Document uploaded", detail: "acme_nda_v2.pdf", icon: "upload" },
+      { time: "Feb 22, 3:10 PM", action: "Assigned to Sarah Chen", detail: "Auto-routed based on matter type + expertise", icon: "assign" },
+      { time: "Feb 22, 3:09 PM", action: "Auto-classified as NDA Review", detail: "Confidence: 94%", icon: "classify" },
+      { time: "Feb 22, 3:08 PM", action: "Created via Slack intake", detail: "Requested by John Miller (Engineering)", icon: "create" },
+    ],
+    tasks: [
+      { id: 1, text: "Initial AI review complete", done: true },
+      { id: 2, text: "Review non-compete clause (flagged HIGH)", done: false },
+      { id: 3, text: "Review liability cap (flagged HIGH)", done: false },
+      { id: 4, text: "Get VP Legal approval", done: false },
+      { id: 5, text: "Send redlined version to counterparty", done: false },
+    ]
+  },
+  // ... generate 9 more with variety in status, type, priority, assignee, requester department
+  // Statuses: 3 New, 2 In Review, 2 Pending Approval, 2 Approved, 1 Closed
+  // Types: NDA Review, MSA Review, Employment Agreement, Vendor Onboarding, IP Assignment, Policy Update, Compliance Audit, Data Processing Agreement, Software License Review, Amendment Review
+  // Make them feel real — specific company names, specific issues
+];
+
+// 6 months of chart data
+export const monthlyData = [
+  { month: "Sep 2025", requests: 89, resolved: 82 },
+  { month: "Oct 2025", requests: 97, resolved: 91 },
+  { month: "Nov 2025", requests: 112, resolved: 104 },
+  { month: "Dec 2025", requests: 78, resolved: 76 },
+  { month: "Jan 2026", requests: 121, resolved: 108 },
+  { month: "Feb 2026", requests: 128, resolved: 95 },
+];
+
+// Generate additional chart data for matter types, workload distribution, risk distribution, etc.
+```
+
+## IMPORTANT TECHNICAL NOTES:
+
+1. The React app should proxy API calls to the FastAPI backend at localhost:8000 (or wherever it's running on Replit)
+2. The AI chatbot on the Assistant page should make real API calls to /api/v1/search/ask
+3. Document upload should call real /api/v1/documents/upload and /api/v1/analysis/classify endpoints
+4. The ANTHROPIC_API_KEY is already configured in Replit Secrets
+5. Everything else (matters, dashboard data, Slack/email mocks) uses the mock data
+6. Make sure the app is responsive — works on both desktop and tablet views
+7. Use React Router with these routes: /intake, /matters, /matters/:id, /assistant, /documents, /analytics, /privacy, /settings
+8. Default route (/) should redirect to /intake
+
+## FINAL NOTE:
+This prototype is being used to demonstrate product thinking and AI architecture skills to a hiring manager at a top tech company. The UI quality matters A LOT. Make it look like a real product, not a hackathon project. Every detail counts — consistent spacing, proper loading states, smooth transitions, realistic mock data. Think Checkbox.ai or Linear level polish.

@@ -1,0 +1,47 @@
+{
+  "Limitation of Liability": {
+    "preferred": "Mutual cap at 2x annual contract value",
+    "fallback": "Mutual cap at 1x annual contract value",
+    "red_line": "No uncapped liability; no unlimited indemnification"
+  },
+  "Termination": {
+    "preferred": "Mutual termination for convenience with 90 days notice",
+    "fallback": "60 days notice acceptable",
+    "red_line": "Must have termination for cause provision"
+  },
+  "Indemnification": {
+    "preferred": "Mutual indemnification for IP infringement and breach",
+    "fallback": "Vendor indemnifies for IP; mutual for breach",
+    "red_line": "No one-sided indemnification without cap"
+  },
+  "Confidentiality": {
+    "preferred": "Mutual NDA with 3-year survival period",
+    "fallback": "2-year survival acceptable",
+    "red_line": "Must include carve-outs for legally compelled disclosure"
+  },
+  "Data Protection": {
+    "preferred": "GDPR and CCPA compliant; DPA required",
+    "fallback": "Contractual data protection commitments",
+    "red_line": "No unlimited right to use customer data"
+  },
+  "IP Assignment": {
+    "preferred": "Customer owns all work product; vendor retains pre-existing IP with license",
+    "fallback": "Joint ownership with exclusive license",
+    "red_line": "Vendor cannot own customer-specific deliverables"
+  },
+  "Payment Terms": {
+    "preferred": "Net 30 from invoice date",
+    "fallback": "Net 45 acceptable",
+    "red_line": "No prepayment exceeding 25% of total contract value"
+  },
+  "Non-Compete": {
+    "preferred": "No non-compete or maximum 6 months in narrow scope",
+    "fallback": "12 months with geographic limitation",
+    "red_line": "No blanket non-compete exceeding 12 months"
+  },
+  "Governing Law": {
+    "preferred": "State of California, USA",
+    "fallback": "State of Delaware or New York",
+    "red_line": "Must be US jurisdiction; no foreign arbitration"
+  }
+}

@@ -1,0 +1,143 @@
+Rebuild LegalLens into a full Legal AI Hub platform. Keep the existing FastAPI backend (document processing, classification, extraction, RAG, comparison, governance) but completely rebuild the Streamlit frontend with 6 main modules. The design should be clean, modern, and feel like a real SaaS product — not a developer tool. This is built for non-technical lawyers and legal ops teams.
+
+NO mention of Apple or any specific company anywhere. This is "built for enterprise legal teams."
+
+## 6 MODULES:
+
+### 1. 🚪 AI Legal Front Door (Intake & Triage) — THIS IS THE HOME PAGE
+- A clean chat-style intake interface where a user types their legal request in natural language (e.g., "I need an NDA reviewed for a new vendor", "What's our policy on data retention?", "I need to get a contract approved urgently")
+- When the user submits a request, AI auto-classifies it into a matter type: Contract Review, NDA Request, Policy Question, Compliance Check, IP Review, Employment Matter, Vendor Agreement, Litigation Hold, etc.
+- Shows the classification result with confidence score, urgency level (Low/Medium/High/Urgent), and recommended routing (which team/person/workflow it should go to)
+- Below the chat, show a "Recent Requests" feed showing the last 5-10 requests with their status (New, Triaged, In Progress, Resolved)
+- Also show quick-action buttons: "Request NDA", "Policy Question", "Contract Review", "Report an Issue" — these are self-service shortcuts
+- Mock Slack integration panel on the side: shows a simulated Slack conversation where someone types "#legal I need an NDA for Acme Corp" and the bot responds with "Got it! I've created matter #M-2024-0142. Classified as: NDA Request (High confidence). Assigned to: Sarah, Contracts Team. ETA: 2 business days. Track status here: [link]"
+- Mock Email integration panel: shows a parsed incoming email from "john@company.com" with subject "Need contract reviewed ASAP" that gets auto-parsed into a matter with extracted details (sender, urgency, matter type, attachments)
+
+### 2. 📋 Matter Management
+- A Kanban board with columns: New | In Review | Pending Approval | Approved | Closed
+- Each matter card shows: Matter ID (#M-2024-0142), Title, Type (NDA, MSA, etc.), Requester name, Assigned attorney, Priority badge (color-coded), Due date, Number of linked documents
+- Clicking a matter opens a detail view with:
+  - Matter summary (AI-generated one-liner)
+  - Timeline/activity feed (chronological log of all actions: "Created via Slack intake", "Auto-classified as NDA Request", "Assigned to Sarah Chen", "Document uploaded: vendor_nda_v2.pdf", "AI clause extraction complete — 2 HIGH risk flags", "Comment by Sarah: Need to renegotiate liability cap")
+  - Linked documents section — shows uploaded docs with their classification and risk summary
+  - This is where the Document Intelligence features live: upload a doc to the matter, auto-classify it, extract clauses, show risk scores — all tied to this specific matter
+  - Tasks/checklist (e.g., "Review termination clause", "Get VP approval", "Send to counterparty")
+  - Notes section for internal lawyer notes
+- Use mock/demo data to populate 8-10 sample matters across different statuses so the board looks real and alive
+- Include a table/list view toggle as alternative to Kanban
+
+### 3. 💬 AI Legal Assistant (Chatbot)
+- Full chat interface — looks like a messaging app
+- The chatbot can:
+  - Answer policy questions: "What's our standard liability cap for vendor contracts?" → responds with answer + cites the playbook
+  - Answer document questions: "Summarize the key risks in matter #M-2024-0142" → uses RAG to pull from uploaded docs
+  - Help with intake: "I need to get a contract reviewed" → walks the user through creating a new matter
+  - Provide self-service links: "How do I request an NDA?" → provides the workflow link
+- Show a "Sources" section below each AI response with citations (which document, which section, confidence score)
+- Chat history in the sidebar showing past conversations
+- At the bottom, show a disclaimer: "AI responses are for guidance only. Always consult with your legal team for final decisions."
+- Also show a "Chatbot on Slack" preview panel: simulated Slack DM with the legal bot showing the same kind of Q&A
+- Also show a "Chatbot on Email" preview: shows how the bot responds to email queries with structured answers
+
+### 4. 📄 Document Intelligence (nested within Matter Management but also accessible standalone)
+- Upload documents (PDF, DOCX, TXT)
+- Auto-classification with confidence scores
+- Clause extraction with risk scoring (LOW/MEDIUM/HIGH/CRITICAL with color-coded badges)
+- Contract comparison (upload two versions, see semantic diff)
+- Playbook-driven analysis (shows how each clause compares to org's standard playbook)
+- This should also be accessible as its own page for users who just want to analyze a document without creating a full matter
+- Keep the existing backend endpoints for all of this
+
+### 5. 📊 Dashboard & Analytics
+- This should look like an executive dashboard. Clean, visual, data-driven.
+- Use mock data to make it look populated and real.
+- Metrics to show:
+  - Total open matters (big number)
+  - Requests this month (big number with trend arrow)
+  - Average cycle time (days from request to resolution)
+  - Matters by type (pie/donut chart — NDA 35%, Contract Review 25%, Policy 20%, Compliance 10%, Other 10%)
+  - Matters by status (bar chart — New, In Review, Pending, Approved, Closed)
+  - Request volume over time (line chart — last 6 months, showing upward trend)
+  - Workload by assignee (horizontal bar chart — Sarah: 12, James: 8, Lisa: 15, etc.)
+  - Average response time by matter type (bar chart)
+  - Risk flag distribution across all analyzed documents (pie chart — LOW, MEDIUM, HIGH, CRITICAL)
+  - Bottleneck alert: "5 matters have been in 'Pending Approval' for >7 days"
+- All charts should use Plotly or Streamlit's native charting
+- Add a date range filter at the top
+
+### 6. 🔒 Privacy & LLM Safety — THIS IS THE KEY DIFFERENTIATOR
+This page explains how the platform keeps legal data safe. It should be visual, clear, and written for non-technical lawyers who are nervous about AI.
+
+Section 1: "How Your Data Flows"
+- Visual architecture diagram (use Streamlit columns and styled containers to simulate this):
+  - Show: User uploads document → Document stored in YOUR infrastructure → Text extracted locally → Chunks created → Sent to LLM for analysis → Response returned → Audit logged
+  - Emphasize with green checkmarks: "✅ Documents stored on your servers", "✅ No data retained by LLM provider", "✅ Every AI interaction logged"
+  - Red X marks: "❌ No training on your data", "❌ No third-party access", "❌ No data leaves your network (in self-hosted mode)"
+
+Section 2: "Deployment Modes"
+- Two cards side by side:
+  - 🔒 SELF-HOSTED / AIR-GAPPED: "LLM runs locally (Llama 3, Mistral). All data stays on-premises. Zero external API calls. For organizations where data can never leave the perimeter. Suitable for: Defense, Healthcare, Financial Services, and any org with strict data residency requirements."
+  - 🔗 HYBRID: "Connects to external LLM APIs (Claude, GPT) with zero-retention agreements. Integrates with CLM/DMS tools (Ironclad, iManage, DocuSign) via secure API connectors. Full control over which data goes where. Suitable for: Tech companies, enterprises with vetted vendor programs."
+
+Section 3: "What the AI Sees"
+- A transparency panel showing:
+  - "When you upload a contract, here's exactly what happens:"
+  - Step 1: Document text extracted (locally, on your server)
+  - Step 2: Text split into sections (no PII sent to LLM unless necessary)
+  - Step 3: PII Detection runs first — names, SSNs, account numbers flagged and optionally redacted before LLM processing
+  - Step 4: Relevant sections sent to LLM with task-specific prompt
+  - Step 5: LLM returns structured analysis (classification, clauses, risk scores)
+  - Step 6: Full audit log recorded (input hash, output, timestamp, model used)
+  - "The LLM never sees your full document — only the relevant sections needed for the specific task."
+
+Section 4: "Integrations & Security"
+- Grid of integration cards showing supported connectors:
+  - Slack (intake, chatbot), Email (intake, notifications), Ironclad (CLM sync), iManage (document management), DocuSign (e-signatures), Salesforce (matter tracking), Jira (task management), SSO (Okta, Azure AD)
+  - Each card shows a toggle: Connected / Not Connected
+  - A note: "All integrations use encrypted API connections. Data flows are configurable — you control exactly what syncs where."
+
+Section 5: "Audit & Compliance"
+- Show the existing governance/audit trail data
+- Every AI query logged with: timestamp, user, action, document (hashed), model used, confidence score, latency
+- Export to CSV button
+- "Designed for SOC 2, ISO 27001, GDPR, and CCPA compliance requirements"
+
+Section 6: "Model Selection Guide"
+- A comparison table:
+  | Consideration | Self-Hosted (Llama/Mistral) | API (Claude/GPT) |
+  | Data residency | ✅ All on-prem | ⚠️ Sent to provider (with zero-retention) |
+  | Performance | Good | Best |
+  | Cost | Hardware + maintenance | Per-token API fees |
+  | Setup complexity | Higher | Lower |
+  | Best for | Max security, regulated industries | Speed, quality, lower ops burden |
+
+## DESIGN GUIDELINES:
+- Use a dark sidebar with clean navigation icons
+- The overall feel should be professional SaaS — think Linear, Notion, or Checkbox.ai
+- Use consistent color coding: 🟢 Green = LOW risk/good, 🟡 Yellow = MEDIUM, 🟠 Orange = HIGH, 🔴 Red = CRITICAL
+- All mock data should feel realistic — use realistic names, dates, matter IDs
+- The chatbot interfaces should feel conversational and modern
+- Every page should have a clean header with the page title and a brief description
+- Footer: "LegalLens — AI-Powered Legal Intelligence Platform | Built for enterprise legal teams that demand privacy-first AI."
+
+## TECHNICAL NOTES:
+- Keep the existing FastAPI backend and all backend files as they are
+- The Streamlit frontend should use st.set_page_config with wide layout
+- Use st.sidebar for navigation
+- For charts, use plotly or streamlit native charts
+- For the Kanban board, use st.columns with styled containers
+- Mock data should be generated in a separate mock_data.py file that the frontend imports
+- The ANTHROPIC_API_KEY is already in Replit Secrets — use it for the chatbot and document intelligence features
+- Make sure the AI chatbot actually works by calling the existing /api/v1/search/ask endpoint
+- Make sure document upload and classification actually works by calling the existing /api/v1/documents/upload and /api/v1/analysis/classify endpoints
+
+## SAMPLE MOCK DATA TO INCLUDE:
+Generate realistic mock data for:
+- 10 matters across different statuses (3 New, 2 In Review, 2 Pending Approval, 2 Approved, 1 Closed)
+- Matter types: NDA Review, MSA Review, Employment Agreement, Vendor Onboarding, IP Assignment, Policy Update, Compliance Audit, Data Processing Agreement
+- Assignees: Sarah Chen, James Rodriguez, Lisa Park, Michael Torres, Emily Watson
+- Requesters from different departments: Engineering, Sales, Marketing, HR, Finance, Product
+- 6 months of historical request data for the dashboard charts
+- Realistic timeline entries for each matter
+
+Build this and make it look amazing. The person using this prototype is trying to get hired at a top tech company and needs this to demonstrate product thinking, AI architecture skills, and understanding of legal ops workflows.
